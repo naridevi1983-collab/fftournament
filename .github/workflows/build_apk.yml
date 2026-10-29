@@ -8,14 +8,14 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -30,7 +30,6 @@ jobs:
           flutter create -t app --org com.fftournament.app my_final_app
           cd my_final_app
           
-          # सटीक main.dart फाइल लिखना
           cat << 'EOF' > lib/main.dart
           import 'package:flutter/material.dart';
 
@@ -170,7 +169,7 @@ jobs:
           
           flutter pub get
           flutter build apk --release
-          
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
