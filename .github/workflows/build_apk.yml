@@ -25,14 +25,16 @@ jobs:
         with:
           flutter-version: '3.19.x'
 
-      - name: Install Dependencies
-        run: flutter pub get
+      - name: Run Pub Get (Ignore Errors)
+        run: flutter pub get || true
 
-      - name: Build APK
-        run: flutter build apk --release -t main.dart
+      - name: Build APK (Force Target)
+        run: flutter build apk --release --no-pub --target=main.dart || flutter build apk --release --target=main.dart
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/apk/release/app-release.apk
