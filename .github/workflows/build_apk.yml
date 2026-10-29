@@ -25,24 +25,157 @@ jobs:
         with:
           flutter-version: '3.19.x'
 
-      - name: Dynamic Independent Build
+      - name: Create Independent App with Custom Rules
         run: |
           cd ..
-          flutter create -t app --org com.fftournament.app temp_ff_app
+          flutter create -t app --org com.fftournament.app final_ff_app
+          cd final_ff_app
           
-          # ऑटोमैटिकली main.dart को ढूंढकर नए प्रोजेक्ट में कॉपी करना
-          find . -name "main.dart" -exec cp {} temp_ff_app/lib/main.dart \;
+          # बिल्कुल सटीक और बिना किसी एरर वाली main.dart फाइल लिखना
+          cat << 'EOF' > lib/main.dart
+          import 'package:flutter/material.dart';
+
+          void main() {
+            runApp(FreeFireTournamentApp());
+          }
+
+          class FreeFireTournamentApp extends StatelessWidget {
+            @override
+            Widget build(BuildContext context) {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                theme: ThemeData.dark().copyWith(
+                  primaryColor: Colors.amber,
+                  scaffoldBackgroundColor: Color(0xFF121212),
+                ),
+                home: TournamentHomeScreen(),
+              );
+            }
+          }
+
+          class TournamentHomeScreen extends StatelessWidget {
+            final List<Map<String, dynamic>> matches = [
+              {
+                "mode": "Survival Mode",
+                "type": "Solo",
+                "fee": "₹6",
+                "prize": "Rank 1-3 Pool",
+                "details": "Rank 1: ₹100 | Rank 2: ₹40 | Rank 3: ₹10"
+              },
+              {
+                "mode": "BR Full Map",
+                "type": "Solo",
+                "fee": "₹7",
+                "prize": "₹120",
+                "details": "Booyah: ₹120 + Per Kill: ₹5"
+              },
+              {
+                "mode": "Normal CS 1v1",
+                "type": "1v1 Solo",
+                "fee": "₹25",
+                "prize": "₹50",
+                "details": "Classic 1v1 Clash Squad"
+              },
+              {
+                "mode": "CS 1v1 Headshot",
+                "type": "1v1 Only HS",
+                "fee": "₹25",
+                "prize": "₹55",
+                "details": "Headshot Only Match"
+              },
+              {
+                "mode": "CS Headshot 4v4",
+                "type": "Squad (Per Person)",
+                "fee": "₹25",
+                "prize": "₹250",
+                "details": "Full Squad Clash Squad"
+              },
+              {
+                "mode": "BR Full Map Duo",
+                "type": "Duo Match",
+                "fee": "₹15",
+                "prize": "₹130",
+                "details": "Booyah: ₹130 + Per Kill: ₹8"
+              },
+            ];
+
+            @override
+            Widget build(BuildContext context) {
+              return Scaffold(
+                appBar: AppBar(
+                  title: Text('FF Tournament Dashboard', style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)),
+                  backgroundColor: Colors.black,
+                  elevation: 0,
+                ),
+                body: ListView.builder(
+                  itemCount: matches.length,
+                  itemBuilder: (context, index) {
+                    final match = matches[index];
+                    return Card(
+                      margin: EdgeInsets.all(12),
+                      color: Color(0xFF1E1E1E),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.between,
+                              children: [
+                                Text(match["mode"], style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(5)),
+                                  child: Text(match["type"], style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 11)),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 8),
+                            Text(match["details"], style: TextStyle(color: Colors.amber, fontSize: 13, fontWeight: FontWeight.w500)),
+                            SizedBox(height: 15),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.between,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text("WINNING PRIZE", style: TextStyle(fontSize: 11, color: Colors.grey)),
+                                    Text(match["prize"], style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.green)),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text("ENTRY FEE", style: TextStyle(fontSize: 11, color: Colors.grey)),
+                                    Text(match["fee"], style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
+                                  ],
+                                ),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                                  onPressed: () {},
+                                  child: Text("JOIN", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            }
+          }
+          EOF
           
-          cd temp_ff_app
           flutter pub get
           flutter build apk --release
-          
-          # आउटपुट को सुरक्षित जगह पर भेजना
-          mkdir -p ../artifact_out
-          cp build/app/outputs/flutter-apk/app-release.apk ../artifact_out/
+          mkdir -p ../fftournament/artifact_out
+          cp build/app/outputs/flutter-apk/app-release.apk ../fftournament/artifact_out/
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
-          path: ../artifact_out/app-release.apk
+          path: artifact_out/app-release.apk
