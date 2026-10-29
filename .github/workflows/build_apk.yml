@@ -8,30 +8,29 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: '17'
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.x'
+          flutter-version: '3.24.x'
 
       - name: Create Independent App with Custom Rules
         run: |
-          cd ..
-          flutter create -t app --org com.fftournament.app final_ff_app
-          cd final_ff_app
+          flutter create -t app --org com.fftournament.app my_final_app
+          cd my_final_app
           
-          # बिल्कुल सटीक और बिना किसी एरर वाली main.dart फाइल लिखना
+          # सटीक main.dart फाइल लिखना
           cat << 'EOF' > lib/main.dart
           import 'package:flutter/material.dart';
 
@@ -171,11 +170,9 @@ jobs:
           
           flutter pub get
           flutter build apk --release
-          mkdir -p ../fftournament/artifact_out
-          cp build/app/outputs/flutter-apk/app-release.apk ../fftournament/artifact_out/
-
+          
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
-          path: artifact_out/app-release.apk
+          path: my_final_app/build/app/outputs/flutter-apk/app-release.apk
