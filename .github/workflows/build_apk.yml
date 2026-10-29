@@ -25,26 +25,19 @@ jobs:
         with:
           flutter-version: '3.19.x'
 
-      - name: Fresh Clean Build Structure
+      - name: Standalone Build In Temporary Directory
         run: |
-          mkdir -p ../backup_dir
-          cp lib/main.dart ../backup_dir/main.dart || cp main.dart ../backup_dir/main.dart
-          rm -rf * .github
-          flutter create -t app --org com.fftournament.app my_tournament_app
-          mv my_tournament_app/* .
-          mv my_tournament_app/.* . 2>/dev/null || true
-          rm -rf my_tournament_app
-          mkdir -p lib
-          cp ../backup_dir/main.dart lib/main.dart
-
-      - name: Install Dependencies
-        run: flutter pub get
-
-      - name: Build APK
-        run: flutter build apk --release
+          cd ..
+          flutter create -t app --org com.fftournament.app temp_ff_app
+          cp fftournament/lib/main.dart temp_ff_app/lib/main.dart || cp fftournament/main.dart temp_ff_app/lib/main.dart
+          cd temp_ff_app
+          flutter pub get
+          flutter build apk --release
+          mkdir -p ../fftournament/build_output
+          cp build/app/outputs/flutter-apk/app-release.apk ../fftournament/build_output/
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build_output/app-release.apk
