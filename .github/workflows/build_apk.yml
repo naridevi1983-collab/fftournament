@@ -25,6 +25,24 @@ jobs:
         with:
           flutter-version: '3.19.x'
 
+      - name: Create Valid Flutter Structure & Move Code
+        run: |
+          # बैकअप लें मुख्य कोड का
+          mv lib/main.dart ../main_backup.dart || mv main.dart ../main_backup.dart
+          rm -rf * .github
+          
+          # नया फ्रेश फ्लटर प्रोजेक्ट बनाएं
+          flutter create -t app --org com.fftournament.app fftournament_app
+          
+          # प्रोजेक्ट फाइलों को बाहर लाएं
+          mv fftournament_app/* .
+          mv fftournament_app/.* . 2>/dev/null || true
+          rm -rf fftournament_app
+          
+          # बैकअप कोड को सही जगह पर डालें
+          mkdir -p lib
+          mv ../main_backup.dart lib/main.dart
+
       - name: Install Dependencies
         run: flutter pub get
 
